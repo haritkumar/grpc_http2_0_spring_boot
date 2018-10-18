@@ -42,6 +42,44 @@ We specify how we want the information we’re serializing to be structured by d
 	  <artifactId>grpc-spring-boot-starter</artifactId>
 	  <version>${grpc-spring-boot-starter.version}</version>
 </dependency>
+
+<build>
+		<extensions>
+			<!-- os-maven-plugin -->
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>${os-maven-plugin.version}</version>
+			</extension>
+		</extensions>
+		<plugins>
+			<!-- spring-boot-maven-plugin -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<!-- protobuf-maven-plugin -->
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>${protobuf-maven-plugin.version}</version>
+				<configuration>
+					<protocArtifact>com.google.protobuf:protoc:3.5.1-1:exe:${os.detected.classifier}</protocArtifact>
+					<pluginId>grpc-java</pluginId>
+					<pluginArtifact>io.grpc:protoc-gen-grpc-java:1.11.0:exe:${os.detected.classifier}</pluginArtifact>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>compile-custom</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 ```
 
 **os-maven-plugin** extension that generates various useful platform-dependent project properties. This information is needed as the Protocol Buffer compiler is native code. In other words, the protobuf-maven-plugin needs to fetch the correct compiler for the platform it is running on.
