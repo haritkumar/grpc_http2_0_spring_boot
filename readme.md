@@ -171,7 +171,13 @@ public class GrpcApplicationTests {
 
 ```
 
-- Run test
+- Run test or hit api
+http://localhost:8080/sayhello?firstname=Harit&lastname=Kumar
+
+```sh
+mvn test
+```
+
   ```bash
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \

@@ -13,12 +13,11 @@ import com.grpc.boot.client.HelloWorldClient;
 public class GrpcApplicationTests {
 
 	@Autowired
-	  private HelloWorldClient helloWorldClient;
+	private HelloWorldClient helloWorldClient;
 
-	  @Test
-	  public void testSayHello() {
-	    assertThat(helloWorldClient.sayHello("Harit", "Kumar"))
-	        .isEqualTo("Hello Harit Kumar!");
-	  }
+	@Test
+	public void testSayHello() {
+		assertThat(helloWorldClient.sayHello("Harit", "Kumar")).isEqualTo("Hello Harit Kumar!");
+	}
 
 }
