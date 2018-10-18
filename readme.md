@@ -87,6 +87,26 @@ We specify how we want the information we’re serializing to be structured by d
 
 **protobuf-maven-plugin** will generate Java artifacts for the **HelloWorld.proto** file located in **src/main/proto/** (this is the default location the plugin uses).
 
+```java
+syntax = "proto3";
+
+option java_multiple_files = true;
+package com.grpc.boot.pojo;
+
+message Person {
+  string first_name = 1;
+  string last_name = 2;
+}
+
+message Greeting {
+  string message = 1;
+}
+
+service HelloWorldService {
+  rpc sayHello (Person) returns (Greeting);
+}
+```
+
 Execute following Maven command, and the different message and service classes should be generated under **target/generated-sources/protobuf/**
 
 ```sh
