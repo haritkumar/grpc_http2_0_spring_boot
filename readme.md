@@ -118,9 +118,109 @@ mvn compile
 ### Step 3 Copy all generated classes to **com.grpc.boot.pojo**
 
 ### Step 4 Add server and client
-- HelloWorldServiceImpl
-- HelloWorldClient
+- Server **HelloWorldServiceImpl**
+  HelloWorldServiceImpl POJO that implements the HelloWorldServiceImplBase class that was generated from the **HelloWorld.proto** file. We override the sayHello() method and generate a Greeting response based on the first and last name of the Person passed in the request.
 
+  response is a StreamObserver object. In other words, the service is by default asynchronous and whether you want to block or not when receiving the response(s) is the decision of the client as we will see further below.
+
+  We use the response observer’s onNext() method to return the Greeting and then call the response observer’s onCompleted() method to tell gRPC that we’ve finished writing responses
+
+  The HelloWorldServiceImpl POJO is annotated with @GRpcService which auto-configures the specified gRPC service to be exposed on port **6565**
+
+- Client **HelloWorldClient**
+  To call gRPC service methods, we first need to create a stub. There are two types of stubs available: a blocking/synchronous stub that will wait for the server to respond and a non-blocking/asynchronous stub that makes non-blocking calls to the server, where the response is returned asynchronously.
+
+  In order to transport messages, gRPC uses http/2 and some abstraction layers in between. This complexity is hidden behind a MessageChannel that handles the connectivity. The general recommendation is to use one channel per application and share it among service stubs.
+
+  We use an init() method annotated with @PostConstruct in order to build a new MessageChannel right after the after the bean has been initialized. The channel is then used to create the helloWorldServiceBlockingStub stub.
+
+  gRPC by default uses a secure connection mechanism such as TLS. As this is a simple development test will use usePlaintext() in order to avoid having to setup the different security artifacts such as key/trust stores.
+
+  The sayHello() method creates a Person object using the Builder pattern on which we set the 'firstname' and 'lastname' input parameters.
+
+  The helloWorldServiceBlockingStub is then used to send the request towards the Hello World gRPC service. The result is a Greeting object from which we return the containing message.
+
+
+### Step 5 Test Application
+- Create a test class
+```java
+package com.grpc.boot;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import static org.assertj.core.api.Assertions.assertThat;
+import com.grpc.boot.client.HelloWorldClient;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class GrpcApplicationTests {
+
+	@Autowired
+	  private HelloWorldClient helloWorldClient;
+
+	  @Test
+	  public void testSayHello() {
+	    assertThat(helloWorldClient.sayHello("Harit", "Kumar"))
+	        .isEqualTo("Hello Harit Kumar!");
+	  }
+
+}
+
+```
+
+- Run test
+  ```bash
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.0.6.RELEASE)
+
+2018-10-18 14:32:45.092  INFO 37139 --- [           main] com.grpc.boot.GrpcApplicationTests       : Starting GrpcApplicationTests on Harits-MacBook-Air.local with PID 37139 (started by haritkumar in /Users/haritkumar/Documents/zed_i/grpc_http2_0)
+2018-10-18 14:32:45.096  INFO 37139 --- [           main] com.grpc.boot.GrpcApplicationTests       : No active profile set, falling back to default profiles: default
+2018-10-18 14:32:45.191  INFO 37139 --- [           main] o.s.w.c.s.GenericWebApplicationContext   : Refreshing org.springframework.web.context.support.GenericWebApplicationContext@543295b0: startup date [Thu Oct 18 14:32:45 IST 2018]; root of context hierarchy
+2018-10-18 14:32:47.988  INFO 37139 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**/favicon.ico] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-10-18 14:32:48.359  INFO 37139 --- [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : Looking for @ControllerAdvice: org.springframework.web.context.support.GenericWebApplicationContext@543295b0: startup date [Thu Oct 18 14:32:45 IST 2018]; root of context hierarchy
+2018-10-18 14:32:48.516  INFO 37139 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error]}" onto public org.springframework.http.ResponseEntity<java.util.Map<java.lang.String, java.lang.Object>> org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)
+2018-10-18 14:32:48.520  INFO 37139 --- [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped "{[/error],produces=[text/html]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.errorHtml(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+2018-10-18 14:32:48.588  INFO 37139 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/webjars/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-10-18 14:32:48.590  INFO 37139 --- [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped URL path [/**] onto handler of type [class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2018-10-18 14:32:49.134  INFO 37139 --- [           main] com.grpc.boot.GrpcApplicationTests       : Started GrpcApplicationTests in 4.838 seconds (JVM running for 6.77)
+2018-10-18 14:32:49.140  INFO 37139 --- [           main] o.l.springboot.grpc.GRpcServerRunner     : Starting gRPC Server ...
+2018-10-18 14:32:49.198  INFO 37139 --- [           main] o.l.springboot.grpc.GRpcServerRunner     : 'com.grpc.boot.server.HelloWorldServiceImpl' service has been registered.
+2018-10-18 14:32:49.399  INFO 37139 --- [           main] o.l.springboot.grpc.GRpcServerRunner     : gRPC Server started, listening on port 6565.
+2018-10-18 14:32:49.726  INFO 37139 --- [           main] com.grpc.boot.client.HelloWorldClient    : client sending first_name: "Harit"
+last_name: "Kumar"
+
+2018-10-18 14:32:50.266  INFO 37139 --- [ault-executor-0] c.g.boot.server.HelloWorldServiceImpl    : server received first_name: "Harit"
+last_name: "Kumar"
+
+2018-10-18 14:32:50.273  INFO 37139 --- [ault-executor-0] c.g.boot.server.HelloWorldServiceImpl    : server responded message: "Hello Harit Kumar!"
+
+2018-10-18 14:32:50.290  INFO 37139 --- [           main] com.grpc.boot.client.HelloWorldClient    : client received message: "Hello Harit Kumar!"
+
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.432 s - in com.grpc.boot.GrpcApplicationTests
+2018-10-18 14:32:50.441  INFO 37139 --- [       Thread-3] o.s.w.c.s.GenericWebApplicationContext   : Closing org.springframework.web.context.support.GenericWebApplicationContext@543295b0: startup date [Thu Oct 18 14:32:45 IST 2018]; root of context hierarchy
+2018-10-18 14:32:50.443  INFO 37139 --- [       Thread-3] o.l.springboot.grpc.GRpcServerRunner     : Shutting down gRPC server ...
+2018-10-18 14:32:50.446  INFO 37139 --- [       Thread-3] o.l.springboot.grpc.GRpcServerRunner     : gRPC server stopped.
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 15.480 s
+[INFO] Finished at: 2018-10-18T14:32:50+05:30
+[INFO] Final Memory: 32M/262M
+[INFO] ------------------------------------------------------------------------
+  ```
 
 
 
