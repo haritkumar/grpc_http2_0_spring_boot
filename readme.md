@@ -15,7 +15,44 @@ Here, we could use traditional REST, such as JSON or XML over http. However, the
  ## But how can we do anything with binary data? for this gRPC uses Protobuf
  gRPC has an interchange DSL called protobuf. Protobuf allows us to define an interface to service using a developer friendly format.
 
+gRPC services are defined using protocol buffers. These are language-neutral, platform-neutral, extensible mechanism for serializing structured data.
+
+We specify how we want the information we’re serializing to be structured by defining protocol buffer message types in **.proto** files. Each protocol buffer message is a small logical record of information, containing a series of name-value pairs.
+
 ![alt text](https://res.cloudinary.com/haritkumar/image/upload/v1539849881/github/Protobuf.png)
+
+
+## Implement gRPC in spring boot rest project
+### Step 1 create a Spring boot project with web dependancies
+### Step 2 Add following to pom.xml
+```xml
+<grpc-spring-boot-starter.version>2.3.2</grpc-spring-boot-starter.version>
+<protobuf-maven-plugin.version>0.5.1</protobuf-maven-plugin.version>
+<os-maven-plugin.version>1.6.0</os-maven-plugin.version>
+
+<repositories>
+    <repository>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com/</url>
+    </repository>
+</repositories>
+
+<dependency>
+	  <groupId>org.lognet</groupId>
+	  <artifactId>grpc-spring-boot-starter</artifactId>
+	  <version>${grpc-spring-boot-starter.version}</version>
+</dependency>
+```
+
+**os-maven-plugin** extension that generates various useful platform-dependent project properties. This information is needed as the Protocol Buffer compiler is native code. In other words, the protobuf-maven-plugin needs to fetch the correct compiler for the platform it is running on.
+
+**protobuf-maven-plugin** will generate Java artifacts for the **HelloWorld.proto** file located in **src/main/proto/** (this is the default location the plugin uses).
+
+Execute following Maven command, and the different message and service classes should be generated under **target/generated-sources/protobuf/**
+
+```sh
+mvn compile
+```
 
 
 
