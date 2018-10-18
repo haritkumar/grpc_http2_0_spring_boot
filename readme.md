@@ -21,7 +21,6 @@ We specify how we want the information we’re serializing to be structured by d
 
 ![alt text](https://res.cloudinary.com/haritkumar/image/upload/v1539849881/github/Protobuf.png)
 
-
 ## Implement gRPC in spring boot rest project
 ### Step 1 create a Spring boot project with web dependancies
 ### Step 2 Add following to pom.xml
@@ -52,6 +51,7 @@ We specify how we want the information we’re serializing to be structured by d
 				<version>${os-maven-plugin.version}</version>
 			</extension>
 		</extensions>
+		<pluginManagement>
 		<plugins>
 			<!-- spring-boot-maven-plugin -->
 			<plugin>
@@ -78,6 +78,7 @@ We specify how we want the information we’re serializing to be structured by d
 				</executions>
 			</plugin>
 		</plugins>
+		</pluginManagement>
 	</build>
 
 ```
@@ -91,6 +92,16 @@ Execute following Maven command, and the different message and service classes s
 ```sh
 mvn compile
 ```
+
+![alt text](https://res.cloudinary.com/haritkumar/image/upload/v1539852339/github/proto.png)
+
+### Step 3 Copy all generated classes to **com.grpc.boot.pojo**
+
+### Step 4 Add server and client
+- HelloWorldServiceImpl
+- HelloWorldClient
+
+
 
 
 
